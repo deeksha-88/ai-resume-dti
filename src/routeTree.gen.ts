@@ -9,38 +9,178 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UploadRouteImport } from './routes/upload'
+import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnalysisSkillsRouteImport } from './routes/analysis.skills'
+import { Route as AnalysisScoreRouteImport } from './routes/analysis.score'
+import { Route as AnalysisSalaryRouteImport } from './routes/analysis.salary'
+import { Route as AnalysisRoadmapRouteImport } from './routes/analysis.roadmap'
+import { Route as AnalysisResumeRouteImport } from './routes/analysis.resume'
+import { Route as AnalysisJobsRouteImport } from './routes/analysis.jobs'
+import { Route as AnalysisInterviewRouteImport } from './routes/analysis.interview'
+import { Route as AnalysisChatbotRouteImport } from './routes/analysis.chatbot'
 
+const UploadRoute = UploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalysisRoute = AnalysisRouteImport.update({
+  id: '/analysis',
+  path: '/analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnalysisSkillsRoute = AnalysisSkillsRouteImport.update({
+  id: '/skills',
+  path: '/skills',
+  getParentRoute: () => AnalysisRoute,
+} as any)
+const AnalysisScoreRoute = AnalysisScoreRouteImport.update({
+  id: '/score',
+  path: '/score',
+  getParentRoute: () => AnalysisRoute,
+} as any)
+const AnalysisSalaryRoute = AnalysisSalaryRouteImport.update({
+  id: '/salary',
+  path: '/salary',
+  getParentRoute: () => AnalysisRoute,
+} as any)
+const AnalysisRoadmapRoute = AnalysisRoadmapRouteImport.update({
+  id: '/roadmap',
+  path: '/roadmap',
+  getParentRoute: () => AnalysisRoute,
+} as any)
+const AnalysisResumeRoute = AnalysisResumeRouteImport.update({
+  id: '/resume',
+  path: '/resume',
+  getParentRoute: () => AnalysisRoute,
+} as any)
+const AnalysisJobsRoute = AnalysisJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => AnalysisRoute,
+} as any)
+const AnalysisInterviewRoute = AnalysisInterviewRouteImport.update({
+  id: '/interview',
+  path: '/interview',
+  getParentRoute: () => AnalysisRoute,
+} as any)
+const AnalysisChatbotRoute = AnalysisChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
+  getParentRoute: () => AnalysisRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRouteWithChildren
+  '/upload': typeof UploadRoute
+  '/analysis/chatbot': typeof AnalysisChatbotRoute
+  '/analysis/interview': typeof AnalysisInterviewRoute
+  '/analysis/jobs': typeof AnalysisJobsRoute
+  '/analysis/resume': typeof AnalysisResumeRoute
+  '/analysis/roadmap': typeof AnalysisRoadmapRoute
+  '/analysis/salary': typeof AnalysisSalaryRoute
+  '/analysis/score': typeof AnalysisScoreRoute
+  '/analysis/skills': typeof AnalysisSkillsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRouteWithChildren
+  '/upload': typeof UploadRoute
+  '/analysis/chatbot': typeof AnalysisChatbotRoute
+  '/analysis/interview': typeof AnalysisInterviewRoute
+  '/analysis/jobs': typeof AnalysisJobsRoute
+  '/analysis/resume': typeof AnalysisResumeRoute
+  '/analysis/roadmap': typeof AnalysisRoadmapRoute
+  '/analysis/salary': typeof AnalysisSalaryRoute
+  '/analysis/score': typeof AnalysisScoreRoute
+  '/analysis/skills': typeof AnalysisSkillsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRouteWithChildren
+  '/upload': typeof UploadRoute
+  '/analysis/chatbot': typeof AnalysisChatbotRoute
+  '/analysis/interview': typeof AnalysisInterviewRoute
+  '/analysis/jobs': typeof AnalysisJobsRoute
+  '/analysis/resume': typeof AnalysisResumeRoute
+  '/analysis/roadmap': typeof AnalysisRoadmapRoute
+  '/analysis/salary': typeof AnalysisSalaryRoute
+  '/analysis/score': typeof AnalysisScoreRoute
+  '/analysis/skills': typeof AnalysisSkillsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/analysis'
+    | '/upload'
+    | '/analysis/chatbot'
+    | '/analysis/interview'
+    | '/analysis/jobs'
+    | '/analysis/resume'
+    | '/analysis/roadmap'
+    | '/analysis/salary'
+    | '/analysis/score'
+    | '/analysis/skills'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/analysis'
+    | '/upload'
+    | '/analysis/chatbot'
+    | '/analysis/interview'
+    | '/analysis/jobs'
+    | '/analysis/resume'
+    | '/analysis/roadmap'
+    | '/analysis/salary'
+    | '/analysis/score'
+    | '/analysis/skills'
+  id:
+    | '__root__'
+    | '/'
+    | '/analysis'
+    | '/upload'
+    | '/analysis/chatbot'
+    | '/analysis/interview'
+    | '/analysis/jobs'
+    | '/analysis/resume'
+    | '/analysis/roadmap'
+    | '/analysis/salary'
+    | '/analysis/score'
+    | '/analysis/skills'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalysisRoute: typeof AnalysisRouteWithChildren
+  UploadRoute: typeof UploadRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/upload': {
+      id: '/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analysis': {
+      id: '/analysis'
+      path: '/analysis'
+      fullPath: '/analysis'
+      preLoaderRoute: typeof AnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +188,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analysis/skills': {
+      id: '/analysis/skills'
+      path: '/skills'
+      fullPath: '/analysis/skills'
+      preLoaderRoute: typeof AnalysisSkillsRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
+    '/analysis/score': {
+      id: '/analysis/score'
+      path: '/score'
+      fullPath: '/analysis/score'
+      preLoaderRoute: typeof AnalysisScoreRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
+    '/analysis/salary': {
+      id: '/analysis/salary'
+      path: '/salary'
+      fullPath: '/analysis/salary'
+      preLoaderRoute: typeof AnalysisSalaryRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
+    '/analysis/roadmap': {
+      id: '/analysis/roadmap'
+      path: '/roadmap'
+      fullPath: '/analysis/roadmap'
+      preLoaderRoute: typeof AnalysisRoadmapRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
+    '/analysis/resume': {
+      id: '/analysis/resume'
+      path: '/resume'
+      fullPath: '/analysis/resume'
+      preLoaderRoute: typeof AnalysisResumeRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
+    '/analysis/jobs': {
+      id: '/analysis/jobs'
+      path: '/jobs'
+      fullPath: '/analysis/jobs'
+      preLoaderRoute: typeof AnalysisJobsRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
+    '/analysis/interview': {
+      id: '/analysis/interview'
+      path: '/interview'
+      fullPath: '/analysis/interview'
+      preLoaderRoute: typeof AnalysisInterviewRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
+    '/analysis/chatbot': {
+      id: '/analysis/chatbot'
+      path: '/chatbot'
+      fullPath: '/analysis/chatbot'
+      preLoaderRoute: typeof AnalysisChatbotRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
   }
 }
 
+interface AnalysisRouteChildren {
+  AnalysisChatbotRoute: typeof AnalysisChatbotRoute
+  AnalysisInterviewRoute: typeof AnalysisInterviewRoute
+  AnalysisJobsRoute: typeof AnalysisJobsRoute
+  AnalysisResumeRoute: typeof AnalysisResumeRoute
+  AnalysisRoadmapRoute: typeof AnalysisRoadmapRoute
+  AnalysisSalaryRoute: typeof AnalysisSalaryRoute
+  AnalysisScoreRoute: typeof AnalysisScoreRoute
+  AnalysisSkillsRoute: typeof AnalysisSkillsRoute
+}
+
+const AnalysisRouteChildren: AnalysisRouteChildren = {
+  AnalysisChatbotRoute: AnalysisChatbotRoute,
+  AnalysisInterviewRoute: AnalysisInterviewRoute,
+  AnalysisJobsRoute: AnalysisJobsRoute,
+  AnalysisResumeRoute: AnalysisResumeRoute,
+  AnalysisRoadmapRoute: AnalysisRoadmapRoute,
+  AnalysisSalaryRoute: AnalysisSalaryRoute,
+  AnalysisScoreRoute: AnalysisScoreRoute,
+  AnalysisSkillsRoute: AnalysisSkillsRoute,
+}
+
+const AnalysisRouteWithChildren = AnalysisRoute._addFileChildren(
+  AnalysisRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalysisRoute: AnalysisRouteWithChildren,
+  UploadRoute: UploadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
