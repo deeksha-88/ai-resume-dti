@@ -19,6 +19,7 @@ import { Route as AnalysisRoadmapRouteImport } from './routes/analysis.roadmap'
 import { Route as AnalysisResumeRouteImport } from './routes/analysis.resume'
 import { Route as AnalysisJobsRouteImport } from './routes/analysis.jobs'
 import { Route as AnalysisInterviewRouteImport } from './routes/analysis.interview'
+import { Route as AnalysisChatbotRouteImport } from './routes/analysis.chatbot'
 
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
@@ -70,11 +71,17 @@ const AnalysisInterviewRoute = AnalysisInterviewRouteImport.update({
   path: '/interview',
   getParentRoute: () => AnalysisRoute,
 } as any)
+const AnalysisChatbotRoute = AnalysisChatbotRouteImport.update({
+  id: '/chatbot',
+  path: '/chatbot',
+  getParentRoute: () => AnalysisRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/chatbot': typeof AnalysisChatbotRoute
   '/analysis/interview': typeof AnalysisInterviewRoute
   '/analysis/jobs': typeof AnalysisJobsRoute
   '/analysis/resume': typeof AnalysisResumeRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/chatbot': typeof AnalysisChatbotRoute
   '/analysis/interview': typeof AnalysisInterviewRoute
   '/analysis/jobs': typeof AnalysisJobsRoute
   '/analysis/resume': typeof AnalysisResumeRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/chatbot': typeof AnalysisChatbotRoute
   '/analysis/interview': typeof AnalysisInterviewRoute
   '/analysis/jobs': typeof AnalysisJobsRoute
   '/analysis/resume': typeof AnalysisResumeRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/upload'
+    | '/analysis/chatbot'
     | '/analysis/interview'
     | '/analysis/jobs'
     | '/analysis/resume'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/upload'
+    | '/analysis/chatbot'
     | '/analysis/interview'
     | '/analysis/jobs'
     | '/analysis/resume'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/upload'
+    | '/analysis/chatbot'
     | '/analysis/interview'
     | '/analysis/jobs'
     | '/analysis/resume'
@@ -225,10 +237,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalysisInterviewRouteImport
       parentRoute: typeof AnalysisRoute
     }
+    '/analysis/chatbot': {
+      id: '/analysis/chatbot'
+      path: '/chatbot'
+      fullPath: '/analysis/chatbot'
+      preLoaderRoute: typeof AnalysisChatbotRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
   }
 }
 
 interface AnalysisRouteChildren {
+  AnalysisChatbotRoute: typeof AnalysisChatbotRoute
   AnalysisInterviewRoute: typeof AnalysisInterviewRoute
   AnalysisJobsRoute: typeof AnalysisJobsRoute
   AnalysisResumeRoute: typeof AnalysisResumeRoute
@@ -239,6 +259,7 @@ interface AnalysisRouteChildren {
 }
 
 const AnalysisRouteChildren: AnalysisRouteChildren = {
+  AnalysisChatbotRoute: AnalysisChatbotRoute,
   AnalysisInterviewRoute: AnalysisInterviewRoute,
   AnalysisJobsRoute: AnalysisJobsRoute,
   AnalysisResumeRoute: AnalysisResumeRoute,
