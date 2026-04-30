@@ -14,6 +14,7 @@ import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalysisSkillsRouteImport } from './routes/analysis.skills'
 import { Route as AnalysisScoreRouteImport } from './routes/analysis.score'
+import { Route as AnalysisJobsRouteImport } from './routes/analysis.jobs'
 
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
@@ -40,11 +41,17 @@ const AnalysisScoreRoute = AnalysisScoreRouteImport.update({
   path: '/score',
   getParentRoute: () => AnalysisRoute,
 } as any)
+const AnalysisJobsRoute = AnalysisJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => AnalysisRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/jobs': typeof AnalysisJobsRoute
   '/analysis/score': typeof AnalysisScoreRoute
   '/analysis/skills': typeof AnalysisSkillsRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/jobs': typeof AnalysisJobsRoute
   '/analysis/score': typeof AnalysisScoreRoute
   '/analysis/skills': typeof AnalysisSkillsRoute
 }
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/jobs': typeof AnalysisJobsRoute
   '/analysis/score': typeof AnalysisScoreRoute
   '/analysis/skills': typeof AnalysisSkillsRoute
 }
@@ -69,15 +78,23 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/upload'
+    | '/analysis/jobs'
     | '/analysis/score'
     | '/analysis/skills'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analysis' | '/upload' | '/analysis/score' | '/analysis/skills'
+  to:
+    | '/'
+    | '/analysis'
+    | '/upload'
+    | '/analysis/jobs'
+    | '/analysis/score'
+    | '/analysis/skills'
   id:
     | '__root__'
     | '/'
     | '/analysis'
     | '/upload'
+    | '/analysis/jobs'
     | '/analysis/score'
     | '/analysis/skills'
   fileRoutesById: FileRoutesById
@@ -125,15 +142,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalysisScoreRouteImport
       parentRoute: typeof AnalysisRoute
     }
+    '/analysis/jobs': {
+      id: '/analysis/jobs'
+      path: '/jobs'
+      fullPath: '/analysis/jobs'
+      preLoaderRoute: typeof AnalysisJobsRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
   }
 }
 
 interface AnalysisRouteChildren {
+  AnalysisJobsRoute: typeof AnalysisJobsRoute
   AnalysisScoreRoute: typeof AnalysisScoreRoute
   AnalysisSkillsRoute: typeof AnalysisSkillsRoute
 }
 
 const AnalysisRouteChildren: AnalysisRouteChildren = {
+  AnalysisJobsRoute: AnalysisJobsRoute,
   AnalysisScoreRoute: AnalysisScoreRoute,
   AnalysisSkillsRoute: AnalysisSkillsRoute,
 }
