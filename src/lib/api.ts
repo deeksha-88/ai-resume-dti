@@ -25,6 +25,11 @@ export type AnalysisResult = {
     note: string;
   };
   learningRoadmap: Array<{ title: string; link: string }>;
+  skillDistribution: {
+    matchedPercentage: number;
+    missingPercentage: number;
+    pieData: Array<{ name: string; value: number; percentage: number }>;
+  };
   modifiedResume: {
     summary: string;
     keywordsToAdd: string[];
@@ -57,6 +62,29 @@ export async function chatWithBot(message: string, context: AnalysisResult): Pro
   if (!res.ok) throw new Error("Chat failed");
   const data = await res.json();
   return data.reply as string;
+}
+
+export type InterviewNextResponse = {
+  feedback: string | null;
+  finished: boolean;
+  nextIndex: number | null;
+  nextQuestion: { id: number; question: string } | null;
+  summary: string | null;
+};
+
+export async function getNextInterviewQuestion(params: {
+  questions: Array<{ id: number; question: string }>;
+  currentIndex: number;
+  answer?: string;
+  jobRole?: string;
+}): Promise<InterviewNextResponse> {
+  const res = await fetch(`${API_BASE}/interview/next`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) throw new Error("Interview step failed");
+  return res.json();
 }
 
 export { API_BASE };
