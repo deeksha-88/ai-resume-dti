@@ -18,6 +18,7 @@ import { Route as AnalysisSalaryRouteImport } from './routes/analysis.salary'
 import { Route as AnalysisRoadmapRouteImport } from './routes/analysis.roadmap'
 import { Route as AnalysisResumeRouteImport } from './routes/analysis.resume'
 import { Route as AnalysisJobsRouteImport } from './routes/analysis.jobs'
+import { Route as AnalysisInterviewRouteImport } from './routes/analysis.interview'
 
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
@@ -64,11 +65,17 @@ const AnalysisJobsRoute = AnalysisJobsRouteImport.update({
   path: '/jobs',
   getParentRoute: () => AnalysisRoute,
 } as any)
+const AnalysisInterviewRoute = AnalysisInterviewRouteImport.update({
+  id: '/interview',
+  path: '/interview',
+  getParentRoute: () => AnalysisRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/interview': typeof AnalysisInterviewRoute
   '/analysis/jobs': typeof AnalysisJobsRoute
   '/analysis/resume': typeof AnalysisResumeRoute
   '/analysis/roadmap': typeof AnalysisRoadmapRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/interview': typeof AnalysisInterviewRoute
   '/analysis/jobs': typeof AnalysisJobsRoute
   '/analysis/resume': typeof AnalysisResumeRoute
   '/analysis/roadmap': typeof AnalysisRoadmapRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/interview': typeof AnalysisInterviewRoute
   '/analysis/jobs': typeof AnalysisJobsRoute
   '/analysis/resume': typeof AnalysisResumeRoute
   '/analysis/roadmap': typeof AnalysisRoadmapRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/upload'
+    | '/analysis/interview'
     | '/analysis/jobs'
     | '/analysis/resume'
     | '/analysis/roadmap'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/upload'
+    | '/analysis/interview'
     | '/analysis/jobs'
     | '/analysis/resume'
     | '/analysis/roadmap'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/analysis'
     | '/upload'
+    | '/analysis/interview'
     | '/analysis/jobs'
     | '/analysis/resume'
     | '/analysis/roadmap'
@@ -206,10 +218,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalysisJobsRouteImport
       parentRoute: typeof AnalysisRoute
     }
+    '/analysis/interview': {
+      id: '/analysis/interview'
+      path: '/interview'
+      fullPath: '/analysis/interview'
+      preLoaderRoute: typeof AnalysisInterviewRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
   }
 }
 
 interface AnalysisRouteChildren {
+  AnalysisInterviewRoute: typeof AnalysisInterviewRoute
   AnalysisJobsRoute: typeof AnalysisJobsRoute
   AnalysisResumeRoute: typeof AnalysisResumeRoute
   AnalysisRoadmapRoute: typeof AnalysisRoadmapRoute
@@ -219,6 +239,7 @@ interface AnalysisRouteChildren {
 }
 
 const AnalysisRouteChildren: AnalysisRouteChildren = {
+  AnalysisInterviewRoute: AnalysisInterviewRoute,
   AnalysisJobsRoute: AnalysisJobsRoute,
   AnalysisResumeRoute: AnalysisResumeRoute,
   AnalysisRoadmapRoute: AnalysisRoadmapRoute,
