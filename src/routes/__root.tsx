@@ -1,6 +1,8 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { AppSidebar } from "@/components/AppSidebar";
+import { MobileNav } from "@/components/MobileNav";
 
 function NotFoundComponent() {
   return (
@@ -65,5 +67,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <div className="flex min-h-screen bg-background text-foreground">
+      <AppSidebar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <MobileNav />
+        <main className="flex-1 min-w-0">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
 }
