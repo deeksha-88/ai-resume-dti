@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnalysisScoreRouteImport } from './routes/analysis.score'
 
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
@@ -28,34 +29,42 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnalysisScoreRoute = AnalysisScoreRouteImport.update({
+  id: '/score',
+  path: '/score',
+  getParentRoute: () => AnalysisRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/analysis': typeof AnalysisRoute
+  '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/score': typeof AnalysisScoreRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/analysis': typeof AnalysisRoute
+  '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/score': typeof AnalysisScoreRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/analysis': typeof AnalysisRoute
+  '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
+  '/analysis/score': typeof AnalysisScoreRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/analysis' | '/upload'
+  fullPaths: '/' | '/analysis' | '/upload' | '/analysis/score'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analysis' | '/upload'
-  id: '__root__' | '/' | '/analysis' | '/upload'
+  to: '/' | '/analysis' | '/upload' | '/analysis/score'
+  id: '__root__' | '/' | '/analysis' | '/upload' | '/analysis/score'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AnalysisRoute: typeof AnalysisRoute
+  AnalysisRoute: typeof AnalysisRouteWithChildren
   UploadRoute: typeof UploadRoute
 }
 
@@ -82,12 +91,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analysis/score': {
+      id: '/analysis/score'
+      path: '/score'
+      fullPath: '/analysis/score'
+      preLoaderRoute: typeof AnalysisScoreRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
   }
 }
 
+interface AnalysisRouteChildren {
+  AnalysisScoreRoute: typeof AnalysisScoreRoute
+}
+
+const AnalysisRouteChildren: AnalysisRouteChildren = {
+  AnalysisScoreRoute: AnalysisScoreRoute,
+}
+
+const AnalysisRouteWithChildren = AnalysisRoute._addFileChildren(
+  AnalysisRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AnalysisRoute: AnalysisRoute,
+  AnalysisRoute: AnalysisRouteWithChildren,
   UploadRoute: UploadRoute,
 }
 export const routeTree = rootRouteImport
