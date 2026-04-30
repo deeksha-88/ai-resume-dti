@@ -16,6 +16,7 @@ import { Route as AnalysisSkillsRouteImport } from './routes/analysis.skills'
 import { Route as AnalysisScoreRouteImport } from './routes/analysis.score'
 import { Route as AnalysisSalaryRouteImport } from './routes/analysis.salary'
 import { Route as AnalysisRoadmapRouteImport } from './routes/analysis.roadmap'
+import { Route as AnalysisResumeRouteImport } from './routes/analysis.resume'
 import { Route as AnalysisJobsRouteImport } from './routes/analysis.jobs'
 
 const UploadRoute = UploadRouteImport.update({
@@ -53,6 +54,11 @@ const AnalysisRoadmapRoute = AnalysisRoadmapRouteImport.update({
   path: '/roadmap',
   getParentRoute: () => AnalysisRoute,
 } as any)
+const AnalysisResumeRoute = AnalysisResumeRouteImport.update({
+  id: '/resume',
+  path: '/resume',
+  getParentRoute: () => AnalysisRoute,
+} as any)
 const AnalysisJobsRoute = AnalysisJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
   '/analysis/jobs': typeof AnalysisJobsRoute
+  '/analysis/resume': typeof AnalysisResumeRoute
   '/analysis/roadmap': typeof AnalysisRoadmapRoute
   '/analysis/salary': typeof AnalysisSalaryRoute
   '/analysis/score': typeof AnalysisScoreRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
   '/analysis/jobs': typeof AnalysisJobsRoute
+  '/analysis/resume': typeof AnalysisResumeRoute
   '/analysis/roadmap': typeof AnalysisRoadmapRoute
   '/analysis/salary': typeof AnalysisSalaryRoute
   '/analysis/score': typeof AnalysisScoreRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/analysis': typeof AnalysisRouteWithChildren
   '/upload': typeof UploadRoute
   '/analysis/jobs': typeof AnalysisJobsRoute
+  '/analysis/resume': typeof AnalysisResumeRoute
   '/analysis/roadmap': typeof AnalysisRoadmapRoute
   '/analysis/salary': typeof AnalysisSalaryRoute
   '/analysis/score': typeof AnalysisScoreRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/upload'
     | '/analysis/jobs'
+    | '/analysis/resume'
     | '/analysis/roadmap'
     | '/analysis/salary'
     | '/analysis/score'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/upload'
     | '/analysis/jobs'
+    | '/analysis/resume'
     | '/analysis/roadmap'
     | '/analysis/salary'
     | '/analysis/score'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/analysis'
     | '/upload'
     | '/analysis/jobs'
+    | '/analysis/resume'
     | '/analysis/roadmap'
     | '/analysis/salary'
     | '/analysis/score'
@@ -180,6 +192,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalysisRoadmapRouteImport
       parentRoute: typeof AnalysisRoute
     }
+    '/analysis/resume': {
+      id: '/analysis/resume'
+      path: '/resume'
+      fullPath: '/analysis/resume'
+      preLoaderRoute: typeof AnalysisResumeRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
     '/analysis/jobs': {
       id: '/analysis/jobs'
       path: '/jobs'
@@ -192,6 +211,7 @@ declare module '@tanstack/react-router' {
 
 interface AnalysisRouteChildren {
   AnalysisJobsRoute: typeof AnalysisJobsRoute
+  AnalysisResumeRoute: typeof AnalysisResumeRoute
   AnalysisRoadmapRoute: typeof AnalysisRoadmapRoute
   AnalysisSalaryRoute: typeof AnalysisSalaryRoute
   AnalysisScoreRoute: typeof AnalysisScoreRoute
@@ -200,6 +220,7 @@ interface AnalysisRouteChildren {
 
 const AnalysisRouteChildren: AnalysisRouteChildren = {
   AnalysisJobsRoute: AnalysisJobsRoute,
+  AnalysisResumeRoute: AnalysisResumeRoute,
   AnalysisRoadmapRoute: AnalysisRoadmapRoute,
   AnalysisSalaryRoute: AnalysisSalaryRoute,
   AnalysisScoreRoute: AnalysisScoreRoute,
