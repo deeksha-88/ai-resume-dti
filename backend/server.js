@@ -58,6 +58,16 @@ const SKILL_ALIASES = {
   "adobe xd": ["adobe xd","xd"],
 };
 
+// Skills that don't appear directly in SKILL_ALIASES — generate sensible defaults
+function getVariants(skill) {
+  if (SKILL_ALIASES[skill]) return SKILL_ALIASES[skill];
+  const v = new Set([skill]);
+  v.add(skill.replace(/[-/]/g, " "));
+  v.add(skill.replace(/\s+/g, ""));
+  v.add(skill.replace(/\s+/g, "-"));
+  return Array.from(v);
+}
+
 const DEFAULT_SKILLS = ["communication","teamwork","problem solving","git","rest api","javascript","python","sql"];
 
 function normalize(str) { return (str || "").toLowerCase(); }
@@ -71,7 +81,7 @@ function extractSkills(resumeText) {
 
   const found = new Set();
   for (const skill of allSkills) {
-    const variants = SKILL_ALIASES[skill] || [skill];
+    const variants = getVariants(skill);
     for (const v of variants) {
       const esc = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const re = new RegExp(`(^|[^a-z0-9+#])${esc}([^a-z0-9+#]|$)`, "i");
