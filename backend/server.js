@@ -14,41 +14,117 @@ app.use(cors());
 app.use(express.json({ limit: "5mb" }));
 
 /* ---------------- Skill database per role ---------------- */
+const GENERAL_TECH_SKILLS = [
+  "html","css","javascript","typescript","react","redux","tailwind","bootstrap","nextjs",
+  "nodejs","express","mongodb","sql","mysql","postgresql","python","java","c++","c#",
+  "git","github","rest api","graphql","docker","kubernetes","aws","azure","linux",
+  "firebase","figma","excel","tableau","power bi","pandas","numpy","machine learning","data visualization",
+];
+
+const DEFAULT_SKILLS = [
+  "html","css","javascript","react","nodejs","python","sql","git","github","rest api",
+  "communication","teamwork","problem solving",
+];
+
+function mergeSkills(...groups) {
+  const out = [];
+  const seen = new Set();
+  for (const group of groups) {
+    for (const raw of group || []) {
+      const skill = normalize(raw).trim();
+      if (skill && !seen.has(skill)) {
+        seen.add(skill);
+        out.push(skill);
+      }
+    }
+  }
+  return out;
+}
+
 const ROLE_SKILLS = {
-  "frontend developer": ["html","css","javascript","typescript","react","redux","tailwind","nextjs","git","rest api","responsive design","accessibility"],
-  "backend developer": ["nodejs","express","mongodb","sql","postgresql","rest api","graphql","docker","redis","authentication","git","typescript"],
-  "full stack developer": ["html","css","javascript","typescript","react","nodejs","express","mongodb","sql","git","docker","rest api"],
-  "data scientist": ["python","pandas","numpy","scikit-learn","tensorflow","pytorch","sql","statistics","machine learning","deep learning","data visualization","jupyter"],
-  "data analyst": ["excel","sql","python","tableau","power bi","pandas","statistics","data visualization","etl","reporting"],
-  "machine learning engineer": ["python","tensorflow","pytorch","scikit-learn","mlops","docker","kubernetes","aws","sql","deep learning","nlp","computer vision"],
-  "devops engineer": ["linux","docker","kubernetes","aws","azure","terraform","jenkins","ci/cd","bash","python","ansible","monitoring"],
-  "android developer": ["kotlin","java","android studio","jetpack compose","xml","firebase","rest api","git","mvvm"],
-  "ios developer": ["swift","swiftui","xcode","objective-c","core data","rest api","git","uikit"],
-  "ui ux designer": ["figma","adobe xd","sketch","wireframing","prototyping","user research","design systems","html","css"],
+  "frontend developer": mergeSkills(["html","css","javascript","typescript","react","redux","tailwind","bootstrap","nextjs","git","github","rest api","responsive design","accessibility","figma"]),
+  "web developer": mergeSkills(["html","css","javascript","typescript","react","bootstrap","tailwind","nodejs","git","github","rest api","responsive design","accessibility"]),
+  "backend developer": mergeSkills(["nodejs","express","mongodb","sql","mysql","postgresql","rest api","graphql","docker","redis","authentication","git","github","typescript","java","python"]),
+  "full stack developer": mergeSkills(["html","css","javascript","typescript","react","nextjs","nodejs","express","mongodb","sql","mysql","postgresql","git","github","docker","rest api","authentication"]),
+  "software developer": mergeSkills(["html","css","javascript","typescript","react","nodejs","python","java","sql","git","github","rest api","docker","problem solving"]),
+  "java developer": mergeSkills(["java","spring boot","sql","mysql","postgresql","rest api","microservices","docker","git","github","authentication","linux"]),
+  "python developer": mergeSkills(["python","django","flask","fastapi","sql","postgresql","rest api","pandas","git","github","docker","linux"]),
+  "data scientist": mergeSkills(["python","pandas","numpy","scikit-learn","tensorflow","pytorch","sql","statistics","machine learning","deep learning","data visualization","jupyter"]),
+  "data analyst": mergeSkills(["excel","sql","python","tableau","power bi","pandas","numpy","statistics","data visualization","etl","reporting"]),
+  "machine learning engineer": mergeSkills(["python","tensorflow","pytorch","scikit-learn","mlops","docker","kubernetes","aws","sql","deep learning","machine learning","nlp","computer vision"]),
+  "devops engineer": mergeSkills(["linux","docker","kubernetes","aws","azure","terraform","jenkins","ci/cd","bash","python","ansible","monitoring","git","github"]),
+  "cloud engineer": mergeSkills(["aws","azure","docker","kubernetes","terraform","linux","networking","monitoring","ci/cd","python","bash","git"]),
+  "qa engineer": mergeSkills(["manual testing","automation testing","selenium","javascript","python","java","api testing","postman","sql","git","test cases"]),
+  "cybersecurity analyst": mergeSkills(["networking","linux","python","security","penetration testing","vulnerability assessment","siem","firewall","sql","bash"]),
+  "android developer": mergeSkills(["kotlin","java","android studio","jetpack compose","xml","firebase","rest api","git","github","mvvm"]),
+  "ios developer": mergeSkills(["swift","swiftui","xcode","objective-c","core data","rest api","git","github","uikit"]),
+  "ui ux designer": mergeSkills(["figma","adobe xd","sketch","wireframing","prototyping","user research","design systems","html","css","accessibility"]),
 };
 
-// Skill aliases — many resumes write "Node" not "nodejs", "JS" not "javascript"
+const ROLE_ALIASES = {
+  "front end developer": "frontend developer",
+  "front-end developer": "frontend developer",
+  "frontend engineer": "frontend developer",
+  "react developer": "frontend developer",
+  "reactjs developer": "frontend developer",
+  "ui developer": "frontend developer",
+  "website developer": "web developer",
+  "web designer": "web developer",
+  "back end developer": "backend developer",
+  "back-end developer": "backend developer",
+  "backend engineer": "backend developer",
+  "node developer": "backend developer",
+  "node.js developer": "backend developer",
+  "api developer": "backend developer",
+  "fullstack developer": "full stack developer",
+  "full-stack developer": "full stack developer",
+  "mern stack developer": "full stack developer",
+  "mern developer": "full stack developer",
+  "mean stack developer": "full stack developer",
+  "software engineer": "software developer",
+  "programmer": "software developer",
+  "java engineer": "java developer",
+  "python engineer": "python developer",
+  "ml engineer": "machine learning engineer",
+  "ai engineer": "machine learning engineer",
+  "business analyst": "data analyst",
+  "bi analyst": "data analyst",
+  "quality analyst": "qa engineer",
+  "test engineer": "qa engineer",
+  "automation tester": "qa engineer",
+  "site reliability engineer": "devops engineer",
+  "sre": "devops engineer",
+  "product designer": "ui ux designer",
+  "ux designer": "ui ux designer",
+  "ui designer": "ui ux designer",
+};
+
+// Skill aliases — many resumes write "Node" not "nodejs", "JS" not "javascript".
 const SKILL_ALIASES = {
-  "javascript": ["javascript","js","ecmascript","es6","es2015"],
-  "typescript": ["typescript","ts"],
+  "html": ["html","html5","hypertext markup","hyper text markup","web markup","markup language"],
+  "css": ["css","css3","cascading style sheets","cascading stylesheet","style sheets","stylesheets","web styling","styling"],
+  "javascript": ["javascript","java script","js","ecmascript","es6","es2015","vanilla js","client side scripting"],
+  "typescript": ["typescript","type script","ts"],
   "nodejs": ["nodejs","node.js","node js","node"],
-  "reactjs": ["reactjs","react.js","react"],
-  "react": ["react","reactjs","react.js"],
+  "react": ["react","reactjs","react.js","react js"],
   "nextjs": ["nextjs","next.js","next js"],
-  "express": ["express","express.js","expressjs"],
-  "mongodb": ["mongodb","mongo"],
-  "postgresql": ["postgresql","postgres","psql"],
-  "rest api": ["rest api","restful","rest","api"],
-  "machine learning": ["machine learning","ml"],
+  "express": ["express","express.js","expressjs","express js"],
+  "mongodb": ["mongodb","mongo db","mongo"],
+  "mysql": ["mysql","my sql"],
+  "postgresql": ["postgresql","postgres","postgre sql","psql"],
+  "github": ["github","git hub"],
+  "rest api": ["rest api","restful api","restful","rest","api development","web api","apis"],
+  "machine learning": ["machine learning","ml","predictive modeling","predictive modelling"],
   "deep learning": ["deep learning","dl","neural network","neural networks"],
   "scikit-learn": ["scikit-learn","scikit learn","sklearn"],
-  "ci/cd": ["ci/cd","cicd","ci cd","continuous integration"],
+  "ci/cd": ["ci/cd","cicd","ci cd","continuous integration","continuous deployment"],
   "power bi": ["power bi","powerbi"],
-  "html": ["html","html5"],
-  "css": ["css","css3"],
   "tailwind": ["tailwind","tailwindcss","tailwind css"],
-  "data visualization": ["data visualization","data viz","matplotlib","seaborn","ggplot"],
-  "responsive design": ["responsive design","responsive","mobile first","mobile-first"],
+  "bootstrap": ["bootstrap","bootstrap css"],
+  "data visualization": ["data visualization","data visualisation","data viz","charts","dashboards","matplotlib","seaborn","ggplot"],
+  "responsive design": ["responsive design","responsive web design","responsive","mobile first","mobile-first"],
+  "accessibility": ["accessibility","a11y","wcag"],
+  "authentication": ["authentication","auth","authorization","jwt","oauth","login system"],
   "user research": ["user research","ux research"],
   "design systems": ["design systems","design system"],
   "objective-c": ["objective-c","objective c","objc"],
@@ -56,53 +132,79 @@ const SKILL_ALIASES = {
   "android studio": ["android studio","android"],
   "jetpack compose": ["jetpack compose","compose"],
   "adobe xd": ["adobe xd","xd"],
+  "spring boot": ["spring boot","springboot","spring"],
+  "api testing": ["api testing","postman","rest assured"],
+  "automation testing": ["automation testing","test automation","automated testing"],
+  "manual testing": ["manual testing","manual qa"],
+  "penetration testing": ["penetration testing","pen testing","pentesting"],
+  "vulnerability assessment": ["vulnerability assessment","vulnerability scanning"],
+  "communication": ["communication","communicated","presentation","stakeholder communication"],
+  "teamwork": ["teamwork","team work","collaboration","collaborated","cross functional"],
+  "problem solving": ["problem solving","problem-solving","debugging","troubleshooting","analytical thinking"],
 };
-
-// Skills that don't appear directly in SKILL_ALIASES — generate sensible defaults
-function getVariants(skill) {
-  if (SKILL_ALIASES[skill]) return SKILL_ALIASES[skill];
-  const v = new Set([skill]);
-  v.add(skill.replace(/[-/]/g, " "));
-  v.add(skill.replace(/\s+/g, ""));
-  v.add(skill.replace(/\s+/g, "-"));
-  return Array.from(v);
-}
-
-const DEFAULT_SKILLS = ["communication","teamwork","problem solving","git","rest api","javascript","python","sql"];
 
 function normalize(str) { return (str || "").toLowerCase(); }
 
-/* Robust skill extraction with aliases */
+// Skills that don't appear directly in SKILL_ALIASES — generate sensible defaults.
+function getVariants(skill) {
+  const v = new Set([skill, ...(SKILL_ALIASES[skill] || [])]);
+  v.add(skill.replace(/[-/]/g, " "));
+  v.add(skill.replace(/[\s.-]+/g, ""));
+  v.add(skill.replace(/\s+/g, "-"));
+  v.add(skill.replace(/\s+/g, "."));
+  return Array.from(v).map((x) => normalize(x).trim()).filter(Boolean);
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/* Robust skill extraction with keyword matching, synonyms, case-insensitive matching, and general tech pool. */
 function extractSkills(resumeText) {
   const text = " " + normalize(resumeText).replace(/[^\w\s./+#-]/g, " ").replace(/\s+/g, " ") + " ";
-  const allSkills = new Set();
+  const allSkills = new Set([...GENERAL_TECH_SKILLS, ...DEFAULT_SKILLS, ...Object.keys(SKILL_ALIASES)]);
   Object.values(ROLE_SKILLS).forEach((arr) => arr.forEach((s) => allSkills.add(s)));
-  DEFAULT_SKILLS.forEach((s) => allSkills.add(s));
 
   const found = new Set();
   for (const skill of allSkills) {
-    const variants = getVariants(skill);
-    for (const v of variants) {
-      const esc = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const re = new RegExp(`(^|[^a-z0-9+#])${esc}([^a-z0-9+#]|$)`, "i");
-      if (re.test(text)) { found.add(skill); break; }
+    const variants = getVariants(skill).sort((a, b) => b.length - a.length);
+    for (const variant of variants) {
+      const compactVariant = variant.replace(/[\s.-]+/g, "");
+      const compactText = text.replace(/[\s.-]+/g, "");
+      const boundary = new RegExp(`(^|[^a-z0-9+#])${escapeRegExp(variant)}([^a-z0-9+#]|$)`, "i");
+      const compactBoundary = compactVariant.length >= 3 && new RegExp(`(^|[^a-z0-9+#])${escapeRegExp(compactVariant)}([^a-z0-9+#]|$)`, "i");
+      if (boundary.test(text) || (compactBoundary && compactBoundary.test(compactText))) {
+        found.add(skill);
+        break;
+      }
     }
   }
   return Array.from(found);
 }
 
 function getRoleSkills(jobRole) {
-  const key = normalize(jobRole).trim();
-  if (ROLE_SKILLS[key]) return { key, skills: ROLE_SKILLS[key] };
-  for (const k of Object.keys(ROLE_SKILLS)) {
-    if (key.includes(k) || k.includes(key)) return { key: k, skills: ROLE_SKILLS[k] };
+  const rawKey = normalize(jobRole).replace(/[_/]+/g, " ").replace(/\s+/g, " ").trim();
+  const aliasKey = ROLE_ALIASES[rawKey] || rawKey;
+  if (ROLE_SKILLS[aliasKey]) return { key: aliasKey, skills: ROLE_SKILLS[aliasKey] };
+
+  for (const [alias, mapped] of Object.entries(ROLE_ALIASES)) {
+    if (rawKey.includes(alias) || alias.includes(rawKey)) return { key: mapped, skills: ROLE_SKILLS[mapped] };
   }
-  // Token fallback
-  const tokens = key.split(/\s+/);
   for (const k of Object.keys(ROLE_SKILLS)) {
-    if (tokens.some((t) => t && k.includes(t))) return { key: k, skills: ROLE_SKILLS[k] };
+    if (rawKey.includes(k) || k.includes(rawKey)) return { key: k, skills: ROLE_SKILLS[k] };
   }
-  return { key: key || "generic", skills: DEFAULT_SKILLS };
+
+  if (/front|react|ui\s*dev|client|web/.test(rawKey)) return { key: "frontend developer", skills: ROLE_SKILLS["frontend developer"] };
+  if (/back|server|node|api/.test(rawKey)) return { key: "backend developer", skills: ROLE_SKILLS["backend developer"] };
+  if (/full|mern|mean|software|programmer/.test(rawKey)) return { key: "software developer", skills: ROLE_SKILLS["software developer"] };
+  if (/data|analyst|business intelligence|bi/.test(rawKey)) return { key: "data analyst", skills: ROLE_SKILLS["data analyst"] };
+  if (/machine|\bml\b|\bai\b|deep learning|nlp/.test(rawKey)) return { key: "machine learning engineer", skills: ROLE_SKILLS["machine learning engineer"] };
+  if (/devops|cloud|sre|platform/.test(rawKey)) return { key: "devops engineer", skills: ROLE_SKILLS["devops engineer"] };
+  if (/test|qa|quality/.test(rawKey)) return { key: "qa engineer", skills: ROLE_SKILLS["qa engineer"] };
+  if (/security|cyber/.test(rawKey)) return { key: "cybersecurity analyst", skills: ROLE_SKILLS["cybersecurity analyst"] };
+
+  // Fallback is never empty: unknown roles use the general tech pool instead of producing zero required skills.
+  return { key: rawKey || "general tech role", skills: mergeSkills(DEFAULT_SKILLS, GENERAL_TECH_SKILLS) };
 }
 
 /* ---------------- Learning roadmap ---------------- */
