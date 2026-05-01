@@ -444,15 +444,14 @@ app.post("/analyze", (req, res) => {
     const matched = found.filter((s) => required.includes(s));
     const missing = required.filter((s) => !found.includes(s));
 
-    // Score: weighted — 80% from coverage, 20% bonus for breadth of detected skills
-    const coverage = required.length ? (matched.length / required.length) : 0;
-    const breadth = Math.min(found.length, 12) / 12;
-    let score = Math.round(coverage * 80 + breadth * 20);
-    if (matched.length === 0 && found.length > 0) score = Math.max(score, 15); // didn't match role but has some skills
-    score = Math.max(0, Math.min(100, score));
-
+    // Score is STRICTLY derived from matched vs required role skills.
+    // Invariants:
+    //   - matched.length === 0  =>  score === 0
+    //   - score > 0             =>  matched.length > 0
     const matchedPercentage = required.length ? Math.round((matched.length / required.length) * 100) : 0;
-    const missingPercentage = 100 - matchedPercentage;
+    const missingPercentage = required.length ? (100 - matchedPercentage) : 0;
+    let score = matched.length === 0 ? 0 : matchedPercentage;
+    score = Math.max(0, Math.min(100, score));
 
     const skillDistribution = {
       matchedPercentage,
@@ -474,6 +473,8 @@ app.post("/analyze", (req, res) => {
       jobRole, roleKey, score,
       matchedSkills: matched, missingSkills: missing,
       requiredSkills: required, extractedSkills: found,
+      matchedPercent: matchedPercentage,
+      missingPercent: missingPercentage,
       skillDistribution,
       suggestions, jobRecommendations, salaryInsights,
       learningRoadmap, modifiedResume, mockInterviewQuestions,
