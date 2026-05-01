@@ -8,6 +8,8 @@ export type AnalysisResult = {
   missingSkills: string[];
   requiredSkills: string[];
   extractedSkills: string[];
+  matchedPercent: number;
+  missingPercent: number;
   suggestions: string[];
   jobRecommendations: Array<{
     title: string;
@@ -34,6 +36,9 @@ export type AnalysisResult = {
     summary: string;
     keywordsToAdd: string[];
     rewrittenBullets: string[];
+    skillsSection?: string;
+    experienceSection?: string;
+    fullResume?: string;
     originalLength: number;
   };
   mockInterviewQuestions: Array<{ id: number; question: string }>;

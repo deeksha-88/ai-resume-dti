@@ -58,6 +58,16 @@ const SKILL_ALIASES = {
   "adobe xd": ["adobe xd","xd"],
 };
 
+// Skills that don't appear directly in SKILL_ALIASES — generate sensible defaults
+function getVariants(skill) {
+  if (SKILL_ALIASES[skill]) return SKILL_ALIASES[skill];
+  const v = new Set([skill]);
+  v.add(skill.replace(/[-/]/g, " "));
+  v.add(skill.replace(/\s+/g, ""));
+  v.add(skill.replace(/\s+/g, "-"));
+  return Array.from(v);
+}
+
 const DEFAULT_SKILLS = ["communication","teamwork","problem solving","git","rest api","javascript","python","sql"];
 
 function normalize(str) { return (str || "").toLowerCase(); }
@@ -71,7 +81,7 @@ function extractSkills(resumeText) {
 
   const found = new Set();
   for (const skill of allSkills) {
-    const variants = SKILL_ALIASES[skill] || [skill];
+    const variants = getVariants(skill);
     for (const v of variants) {
       const esc = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const re = new RegExp(`(^|[^a-z0-9+#])${esc}([^a-z0-9+#]|$)`, "i");
@@ -296,6 +306,26 @@ function buildModifiedResume(resumeText, jobRole, matched, missing) {
     summary,
     keywordsToAdd: missing.slice(0, 8),
     rewrittenBullets: uniq.slice(0, 7),
+    skillsSection: matched.length
+      ? `Skills: ${matched.join(", ")}${missing.length ? ` | Learning: ${missing.slice(0,4).join(", ")}` : ""}.`
+      : `Skills: actively building foundations in ${missing.slice(0,5).join(", ") || jobRole + " stack"}.`,
+    experienceSection: uniq.slice(0, 5).map((b) => `• ${b}`).join("\n"),
+    fullResume: [
+      `=== ${jobRole.toUpperCase()} — IMPROVED RESUME ===`,
+      ``,
+      `SUMMARY`,
+      summary,
+      ``,
+      `SKILLS`,
+      matched.length ? matched.join(", ") : "(building foundations)",
+      missing.length ? `Currently learning: ${missing.slice(0,5).join(", ")}` : "",
+      ``,
+      `EXPERIENCE / PROJECTS`,
+      ...uniq.slice(0, 6).map((b) => `• ${b}`),
+      ``,
+      `KEYWORDS TO INCLUDE`,
+      (missing.slice(0, 8).join(", ")) || "(your resume already covers role keywords)",
+    ].filter(Boolean).join("\n"),
     originalLength: resumeText.length,
   };
 }
@@ -370,10 +400,13 @@ function chatbotReply(message, ctx) {
     return `Start here: ${ctx.learningRoadmap.slice(0,4).map((r)=>`${r.title} (${r.link})`).join(" • ")}.`;
 
   if (has("interview","question","prepare","practice"))
-    return `Try this one: "${ctx.mockInterviewQuestions[0]?.question || "Tell me about yourself."}" — open the Mock Interview tab for the full interactive flow.`;
+    return `Interview prep for ${ctx.jobRole}: practice these — ${ctx.mockInterviewQuestions.slice(0,3).map((q,i)=>`Q${i+1}: ${q.question}`).join(" | ")}. Open the Mock Interview tab for the full interactive flow with feedback.`;
+
+  if (has("demand","market","trend","scope","future","growth","hiring trend"))
+    return `Job demand for ${ctx.jobRole}: this role is actively hired across India (Bangalore, Hyderabad, Pune, Remote). Your match (${ctx.score}/100) means ${ctx.score>=70?"you can apply now to mid/senior roles.":ctx.score>=45?"you're competitive for junior/mid roles — close 1-2 gaps for better offers.":"focus on building 2-3 portfolio projects in "+(ctx.missingSkills.slice(0,2).join(", ")||"core skills")+" before applying."}`;
 
   if (has("resume","cv","bullet","summary","rewrite","modify"))
-    return `Suggested summary: ${ctx.modifiedResume.summary} | Add keywords: ${ctx.modifiedResume.keywordsToAdd.slice(0,5).join(", ")}.`;
+    return `Improved summary: "${ctx.modifiedResume.summary}" — Top rewritten bullet: "${ctx.modifiedResume.rewrittenBullets?.[0]||"see Modified Resume tab"}". Keywords to add: ${ctx.modifiedResume.keywordsToAdd.slice(0,5).join(", ")||"(none — good coverage!)"}.`;
 
   if (has("project","build","portfolio"))
     return `Build a project that uses ${ctx.missingSkills[0] || ctx.matchedSkills[0] || "your stack"} end-to-end and ship it publicly. Document the trade-offs in the README.`;
@@ -414,15 +447,14 @@ app.post("/analyze", (req, res) => {
     const matched = found.filter((s) => required.includes(s));
     const missing = required.filter((s) => !found.includes(s));
 
-    // Score: weighted — 80% from coverage, 20% bonus for breadth of detected skills
-    const coverage = required.length ? (matched.length / required.length) : 0;
-    const breadth = Math.min(found.length, 12) / 12;
-    let score = Math.round(coverage * 80 + breadth * 20);
-    if (matched.length === 0 && found.length > 0) score = Math.max(score, 15); // didn't match role but has some skills
-    score = Math.max(0, Math.min(100, score));
-
+    // Score is STRICTLY derived from matched vs required role skills.
+    // Invariants:
+    //   - matched.length === 0  =>  score === 0
+    //   - score > 0             =>  matched.length > 0
     const matchedPercentage = required.length ? Math.round((matched.length / required.length) * 100) : 0;
-    const missingPercentage = 100 - matchedPercentage;
+    const missingPercentage = required.length ? (100 - matchedPercentage) : 0;
+    let score = matched.length === 0 ? 0 : matchedPercentage;
+    score = Math.max(0, Math.min(100, score));
 
     const skillDistribution = {
       matchedPercentage,
@@ -444,6 +476,8 @@ app.post("/analyze", (req, res) => {
       jobRole, roleKey, score,
       matchedSkills: matched, missingSkills: missing,
       requiredSkills: required, extractedSkills: found,
+      matchedPercent: matchedPercentage,
+      missingPercent: missingPercentage,
       skillDistribution,
       suggestions, jobRecommendations, salaryInsights,
       learningRoadmap, modifiedResume, mockInterviewQuestions,
