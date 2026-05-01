@@ -376,7 +376,15 @@ function chatbotReply(message, ctx) {
   const m = normalize(message);
   if (!m) return "Ask me anything about your resume, target role, salary, jobs, or how to improve.";
 
-  const has = (...words) => words.some((w) => m.includes(w));
+  // Flexible token match: split user message into tokens and match against keyword groups.
+  const tokens = m.split(/[^a-z0-9+#.]+/).filter(Boolean);
+  const has = (...words) =>
+    words.some((w) => {
+      const wl = w.toLowerCase();
+      if (m.includes(wl)) return true;
+      // partial token match (e.g. "improving" matches "improv")
+      return tokens.some((t) => t.startsWith(wl) || wl.startsWith(t) && t.length >= 3);
+    });
 
   if (has("hi","hello","hey","yo","hola"))
     return `Hello! I analyzed your resume for "${ctx.jobRole}" — you scored ${ctx.score}/100. Ask about skills, salary, jobs, interview, or how to improve.`;
@@ -417,8 +425,10 @@ function chatbotReply(message, ctx) {
   if (has("who","what are you","your name"))
     return `I'm your AI Resume Assistant, focused on your ${ctx.jobRole} goals. Ask about skills, salary, jobs, interview, or improvements.`;
 
-  // Fallback: try to use any resume keyword the user mentioned
-  const mentioned = ctx.requiredSkills.find((s) => m.includes(s));
+  // Fallback 1: try to use any resume keyword the user mentioned
+  const mentioned = ctx.requiredSkills.find((s) => m.includes(s)) ||
+    ctx.matchedSkills.find((s) => m.includes(s)) ||
+    ctx.missingSkills.find((s) => m.includes(s));
   if (mentioned) {
     const have = ctx.matchedSkills.includes(mentioned);
     return have
@@ -426,7 +436,10 @@ function chatbotReply(message, ctx) {
       : `${mentioned} is a gap for ${ctx.jobRole}. Plan: 1) take a short course, 2) build a small project, 3) add a quantified bullet point.`;
   }
 
-  return `I focus on your ${ctx.jobRole} journey. Try: "How can I improve?", "What's my salary?", "Show jobs", "Show roadmap", "What's my score?", "Interview question".`;
+  // Fallback 2: intelligent dynamic reply that pulls from current analysis
+  const topMissing = ctx.missingSkills.slice(0, 2).join(" and ") || "(none)";
+  const topMatched = ctx.matchedSkills.slice(0, 2).join(", ") || "(none yet)";
+  return `Here's what I can tell you about your ${ctx.jobRole} profile: score ${ctx.score}/100, strengths in ${topMatched}, and the biggest gap is ${topMissing}. Try asking about: "demand", "skills", "improve my resume", "interview prep", "roadmap", "salary", or "jobs".`;
 }
 
 /* ---------------- Routes ---------------- */
