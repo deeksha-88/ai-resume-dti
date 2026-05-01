@@ -400,10 +400,13 @@ function chatbotReply(message, ctx) {
     return `Start here: ${ctx.learningRoadmap.slice(0,4).map((r)=>`${r.title} (${r.link})`).join(" • ")}.`;
 
   if (has("interview","question","prepare","practice"))
-    return `Try this one: "${ctx.mockInterviewQuestions[0]?.question || "Tell me about yourself."}" — open the Mock Interview tab for the full interactive flow.`;
+    return `Interview prep for ${ctx.jobRole}: practice these — ${ctx.mockInterviewQuestions.slice(0,3).map((q,i)=>`Q${i+1}: ${q.question}`).join(" | ")}. Open the Mock Interview tab for the full interactive flow with feedback.`;
+
+  if (has("demand","market","trend","scope","future","growth","hiring trend"))
+    return `Job demand for ${ctx.jobRole}: this role is actively hired across India (Bangalore, Hyderabad, Pune, Remote). Your match (${ctx.score}/100) means ${ctx.score>=70?"you can apply now to mid/senior roles.":ctx.score>=45?"you're competitive for junior/mid roles — close 1-2 gaps for better offers.":"focus on building 2-3 portfolio projects in "+(ctx.missingSkills.slice(0,2).join(", ")||"core skills")+" before applying."}`;
 
   if (has("resume","cv","bullet","summary","rewrite","modify"))
-    return `Suggested summary: ${ctx.modifiedResume.summary} | Add keywords: ${ctx.modifiedResume.keywordsToAdd.slice(0,5).join(", ")}.`;
+    return `Improved summary: "${ctx.modifiedResume.summary}" — Top rewritten bullet: "${ctx.modifiedResume.rewrittenBullets?.[0]||"see Modified Resume tab"}". Keywords to add: ${ctx.modifiedResume.keywordsToAdd.slice(0,5).join(", ")||"(none — good coverage!)"}.`;
 
   if (has("project","build","portfolio"))
     return `Build a project that uses ${ctx.missingSkills[0] || ctx.matchedSkills[0] || "your stack"} end-to-end and ship it publicly. Document the trade-offs in the README.`;
