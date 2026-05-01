@@ -306,6 +306,26 @@ function buildModifiedResume(resumeText, jobRole, matched, missing) {
     summary,
     keywordsToAdd: missing.slice(0, 8),
     rewrittenBullets: uniq.slice(0, 7),
+    skillsSection: matched.length
+      ? `Skills: ${matched.join(", ")}${missing.length ? ` | Learning: ${missing.slice(0,4).join(", ")}` : ""}.`
+      : `Skills: actively building foundations in ${missing.slice(0,5).join(", ") || jobRole + " stack"}.`,
+    experienceSection: uniq.slice(0, 5).map((b) => `• ${b}`).join("\n"),
+    fullResume: [
+      `=== ${jobRole.toUpperCase()} — IMPROVED RESUME ===`,
+      ``,
+      `SUMMARY`,
+      summary,
+      ``,
+      `SKILLS`,
+      matched.length ? matched.join(", ") : "(building foundations)",
+      missing.length ? `Currently learning: ${missing.slice(0,5).join(", ")}` : "",
+      ``,
+      `EXPERIENCE / PROJECTS`,
+      ...uniq.slice(0, 6).map((b) => `• ${b}`),
+      ``,
+      `KEYWORDS TO INCLUDE`,
+      (missing.slice(0, 8).join(", ")) || "(your resume already covers role keywords)",
+    ].filter(Boolean).join("\n"),
     originalLength: resumeText.length,
   };
 }
