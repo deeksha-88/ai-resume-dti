@@ -500,9 +500,6 @@ function chatbotReply(message, ctx) {
   if (has("salary","pay","ctc","package","lpa","compensation","earn"))
     return `For ${ctx.jobRole} in India: expected for you ${ctx.salaryInsights.expectedForYou}. Junior ${ctx.salaryInsights.junior}, Mid ${ctx.salaryInsights.mid}, Senior ${ctx.salaryInsights.senior}. ${ctx.salaryInsights.note}`;
 
-  if (has("job","role","position","openings","hiring","vacancy","apply"))
-    return `Top matches for you: ${ctx.jobRecommendations.slice(0,3).map((j)=>`${j.title} @ ${j.company} (${j.matchPercent}%)`).join(" • ")}.`;
-
   if (has("skill","gap","missing","required","tech","stack"))
     return `Required skills for ${ctx.jobRole}: ${ctx.requiredSkills.join(", ")}. ✅ You have: ${ctx.matchedSkills.join(", ") || "—"}. ⚠️ Missing: ${ctx.missingSkills.join(", ") || "none, great coverage!"}.`;
 
@@ -514,6 +511,9 @@ function chatbotReply(message, ctx) {
 
   if (has("demand","market","trend","scope","future","growth","hiring trend"))
     return `Job demand for ${ctx.jobRole}: this role is actively hired across India (Bangalore, Hyderabad, Pune, Remote). Your match (${ctx.score}/100) means ${ctx.score>=70?"you can apply now to mid/senior roles.":ctx.score>=45?"you're competitive for junior/mid roles — close 1-2 gaps for better offers.":"focus on building 2-3 portfolio projects in "+(ctx.missingSkills.slice(0,2).join(", ")||"core skills")+" before applying."}`;
+
+  if (has("job","role","position","openings","hiring","vacancy","apply"))
+    return `Top ${ctx.jobRole} matches for your current skill profile: ${ctx.jobRecommendations.slice(0,3).map((j)=>`${j.title} @ ${j.company} (${j.matchPercent}%)`).join(" • ")}. Improve ${ctx.missingSkills.slice(0,2).join(" and ") || "your project metrics"} to unlock stronger matches.`;
 
   if (has("resume","cv","bullet","summary","rewrite","modify"))
     return `Improved summary: "${ctx.modifiedResume.summary}" — Top rewritten bullet: "${ctx.modifiedResume.rewrittenBullets?.[0]||"see Modified Resume tab"}". Keywords to add: ${ctx.modifiedResume.keywordsToAdd.slice(0,5).join(", ")||"(none — good coverage!)"}.`;
@@ -541,7 +541,7 @@ function chatbotReply(message, ctx) {
   // Fallback 2: intelligent dynamic reply that pulls from current analysis
   const topMissing = ctx.missingSkills.slice(0, 2).join(" and ") || "(none)";
   const topMatched = ctx.matchedSkills.slice(0, 2).join(", ") || "(none yet)";
-  return `Here's what I can tell you about your ${ctx.jobRole} profile: score ${ctx.score}/100, strengths in ${topMatched}, and the biggest gap is ${topMissing}. Try asking about: "demand", "skills", "improve my resume", "interview prep", "roadmap", "salary", or "jobs".`;
+  return `I can help with resume, jobs, skills, and interview prep. For your ${ctx.jobRole} profile, score is ${ctx.score}/100, strengths are ${topMatched}, and the biggest gap is ${topMissing}. Try asking about demand, skills, resume improvement, interview prep, roadmap, salary, or jobs.`;
 }
 
 /* ---------------- Routes ---------------- */
