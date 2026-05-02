@@ -643,6 +643,50 @@ app.post("/chat", (req, res) => {
   }
 });
 
+/* ---------------- PDF extraction endpoints ---------------- */
+// Multipart upload: field name "file"
+app.post("/extract-pdf", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file || !req.file.buffer) return res.status(400).json({ error: "No file uploaded (field 'file' required)." });
+    const buf = req.file.buffer;
+    if (!isPdfBuffer(buf)) return res.status(400).json({ error: "Uploaded file is not a valid PDF." });
+    const text = await extractTextFromPdfBuffer(buf);
+    console.log("[/extract-pdf] file=", req.file.originalname, "size=", buf.length, "extracted chars=", text.length);
+    if (text.length < 20) {
+      return res.status(422).json({
+        error: "Could not extract readable text from this PDF (it may be a scanned/image-based PDF). Please paste the resume text manually.",
+        resumeText: text,
+      });
+    }
+    res.json({ resumeText: text, length: text.length, fileName: req.file.originalname });
+  } catch (err) {
+    console.error("[/extract-pdf] error:", err);
+    res.status(500).json({ error: "Failed to parse PDF", details: String(err && err.message) });
+  }
+});
+
+// JSON fallback: { pdfBase64: "..." }
+app.post("/extract-pdf-base64", async (req, res) => {
+  try {
+    const { pdfBase64 } = req.body || {};
+    if (!pdfBase64 || typeof pdfBase64 !== "string") return res.status(400).json({ error: "pdfBase64 required" });
+    const buf = Buffer.from(pdfBase64, "base64");
+    if (!isPdfBuffer(buf)) return res.status(400).json({ error: "Decoded data is not a valid PDF." });
+    const text = await extractTextFromPdfBuffer(buf);
+    console.log("[/extract-pdf-base64] size=", buf.length, "extracted chars=", text.length);
+    if (text.length < 20) {
+      return res.status(422).json({
+        error: "Could not extract readable text from this PDF (it may be scanned). Please paste the resume text manually.",
+        resumeText: text,
+      });
+    }
+    res.json({ resumeText: text, length: text.length });
+  } catch (err) {
+    console.error("[/extract-pdf-base64] error:", err);
+    res.status(500).json({ error: "Failed to parse PDF", details: String(err && err.message) });
+  }
+});
+
 /* Interactive interview: returns next question + optional feedback on previous answer */
 app.post("/interview/next", (req, res) => {
   try {
