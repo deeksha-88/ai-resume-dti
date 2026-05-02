@@ -569,7 +569,11 @@ function chatbotReply(message, ctx) {
 
 /* ---------------- Routes ---------------- */
 app.get("/", (_req, res) => {
-  res.json({ ok: true, service: "AI Resume Analyzer API", endpoints: ["POST /analyze","POST /chat","POST /interview/next"] });
+  res.json({
+    ok: true,
+    service: "AI Resume Analyzer API",
+    endpoints: ["POST /analyze", "POST /extract-pdf", "POST /extract-pdf-base64", "POST /chat", "POST /interview/next"],
+  });
 });
 
 app.post("/analyze", (req, res) => {
