@@ -93,3 +93,14 @@ export async function getNextInterviewQuestion(params: {
 }
 
 export { API_BASE };
+
+export async function extractPdfText(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${API_BASE}/extract-pdf`, { method: "POST", body: fd });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || "Failed to extract text from PDF");
+  }
+  return (data.resumeText as string) || "";
+}
