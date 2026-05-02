@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Upload, Loader2, FileText, AlertCircle } from "lucide-react";
-import { analyzeResume } from "@/lib/api";
+import { analyzeResume, extractPdfText } from "@/lib/api";
 import { analysisStore } from "@/store/analysisStore";
 import { SectionHeader } from "@/components/SectionHeader";
 
@@ -25,6 +25,7 @@ function UploadPage() {
 
   async function handleFile(file: File) {
     setFileName(file.name);
+    setError(null);
     const isText = file.type.startsWith("text/") || file.name.endsWith(".txt") || file.name.endsWith(".md");
     if (isText) {
       const text = await file.text();
@@ -32,25 +33,20 @@ function UploadPage() {
       return;
     }
     if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-      // Best-effort: extract printable strings from raw PDF bytes (works for text-based PDFs).
-      const buf = new Uint8Array(await file.arrayBuffer());
-      let s = "";
-      for (let i = 0; i < buf.length; i++) {
-        const c = buf[i];
-        if ((c >= 32 && c < 127) || c === 10 || c === 13) s += String.fromCharCode(c);
-      }
-      // Pull text inside parentheses (PDF text operator strings)
-      const matches = s.match(/\(([^()\\]{2,})\)/g) || [];
-      const extracted = matches
-        .map((m) => m.slice(1, -1))
-        .filter((t) => /[A-Za-z]{2,}/.test(t))
-        .join(" ")
-        .replace(/\s+/g, " ")
-        .trim();
-      if (extracted.length > 40) {
-        setResumeText(extracted);
-      } else {
-        setError("Could not auto-extract text from this PDF. Please paste the resume text below.");
+      // Send PDF to backend for proper parsing with pdf-parse.
+      try {
+        const extracted = await extractPdfText(file);
+        if (extracted && extracted.trim().length > 20) {
+          setResumeText(extracted);
+        } else {
+          setError("Could not extract readable text from this PDF. Please paste the resume text below.");
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? `${err.message}. Make sure the backend is running on http://localhost:5000.`
+            : "Failed to extract PDF. Please paste the resume text below.",
+        );
       }
       return;
     }

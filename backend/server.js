@@ -8,10 +8,33 @@
 
 const express = require("express");
 const cors = require("cors");
+const multer = require("multer");
+// pdf-parse loads a debug file at require time when require.main === module; importing
+// the inner lib path avoids that and works reliably in serverless/dev environments.
+const pdfParse = require("pdf-parse/lib/pdf-parse.js");
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+/* ---------------- PDF text extraction ---------------- */
+async function extractTextFromPdfBuffer(buffer) {
+  try {
+    const data = await pdfParse(buffer);
+    const text = (data && data.text) ? data.text : "";
+    // Normalize whitespace
+    return text.replace(/\u0000/g, " ").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  } catch (err) {
+    console.error("[pdf-parse] failed:", err && err.message);
+    return "";
+  }
+}
+
+function isPdfBuffer(buf) {
+  return buf && buf.length > 4 && buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46; // %PDF
+}
 
 /* ---------------- Skill database per role ---------------- */
 const GENERAL_TECH_SKILLS = [
@@ -546,12 +569,20 @@ function chatbotReply(message, ctx) {
 
 /* ---------------- Routes ---------------- */
 app.get("/", (_req, res) => {
-  res.json({ ok: true, service: "AI Resume Analyzer API", endpoints: ["POST /analyze","POST /chat","POST /interview/next"] });
+  res.json({
+    ok: true,
+    service: "AI Resume Analyzer API",
+    endpoints: ["POST /analyze", "POST /extract-pdf", "POST /extract-pdf-base64", "POST /chat", "POST /interview/next"],
+  });
 });
 
 app.post("/analyze", (req, res) => {
   try {
     const { resumeText, jobRole } = req.body || {};
+    console.log("[/analyze] jobRole=", jobRole, "resumeText length=", resumeText ? resumeText.length : 0);
+    if (resumeText && typeof resumeText === "string") {
+      console.log("[/analyze] resumeText preview:", resumeText.slice(0, 200).replace(/\s+/g, " "));
+    }
     if (!resumeText || typeof resumeText !== "string" || resumeText.trim().length < 20)
       return res.status(400).json({ error: "resumeText must be a string of at least 20 characters." });
     if (!jobRole || typeof jobRole !== "string")
@@ -561,6 +592,7 @@ app.post("/analyze", (req, res) => {
     const found = extractSkills(resumeText);
     const matched = found.filter((s) => required.includes(s));
     const missing = required.filter((s) => !found.includes(s));
+    console.log("[/analyze] role=", roleKey, "extracted=", found.length, "matched=", matched.length, "/", required.length);
 
     // Score is STRICTLY derived from matched vs required role skills.
     // Invariants:
@@ -612,6 +644,50 @@ app.post("/chat", (req, res) => {
     res.json({ reply: chatbotReply(message, context) });
   } catch {
     res.status(500).json({ error: "Internal error" });
+  }
+});
+
+/* ---------------- PDF extraction endpoints ---------------- */
+// Multipart upload: field name "file"
+app.post("/extract-pdf", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file || !req.file.buffer) return res.status(400).json({ error: "No file uploaded (field 'file' required)." });
+    const buf = req.file.buffer;
+    if (!isPdfBuffer(buf)) return res.status(400).json({ error: "Uploaded file is not a valid PDF." });
+    const text = await extractTextFromPdfBuffer(buf);
+    console.log("[/extract-pdf] file=", req.file.originalname, "size=", buf.length, "extracted chars=", text.length);
+    if (text.length < 20) {
+      return res.status(422).json({
+        error: "Could not extract readable text from this PDF (it may be a scanned/image-based PDF). Please paste the resume text manually.",
+        resumeText: text,
+      });
+    }
+    res.json({ resumeText: text, length: text.length, fileName: req.file.originalname });
+  } catch (err) {
+    console.error("[/extract-pdf] error:", err);
+    res.status(500).json({ error: "Failed to parse PDF", details: String(err && err.message) });
+  }
+});
+
+// JSON fallback: { pdfBase64: "..." }
+app.post("/extract-pdf-base64", async (req, res) => {
+  try {
+    const { pdfBase64 } = req.body || {};
+    if (!pdfBase64 || typeof pdfBase64 !== "string") return res.status(400).json({ error: "pdfBase64 required" });
+    const buf = Buffer.from(pdfBase64, "base64");
+    if (!isPdfBuffer(buf)) return res.status(400).json({ error: "Decoded data is not a valid PDF." });
+    const text = await extractTextFromPdfBuffer(buf);
+    console.log("[/extract-pdf-base64] size=", buf.length, "extracted chars=", text.length);
+    if (text.length < 20) {
+      return res.status(422).json({
+        error: "Could not extract readable text from this PDF (it may be scanned). Please paste the resume text manually.",
+        resumeText: text,
+      });
+    }
+    res.json({ resumeText: text, length: text.length });
+  } catch (err) {
+    console.error("[/extract-pdf-base64] error:", err);
+    res.status(500).json({ error: "Failed to parse PDF", details: String(err && err.message) });
   }
 });
 
