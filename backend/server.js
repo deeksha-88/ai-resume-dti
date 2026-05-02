@@ -8,10 +8,33 @@
 
 const express = require("express");
 const cors = require("cors");
+const multer = require("multer");
+// pdf-parse loads a debug file at require time when require.main === module; importing
+// the inner lib path avoids that and works reliably in serverless/dev environments.
+const pdfParse = require("pdf-parse/lib/pdf-parse.js");
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+/* ---------------- PDF text extraction ---------------- */
+async function extractTextFromPdfBuffer(buffer) {
+  try {
+    const data = await pdfParse(buffer);
+    const text = (data && data.text) ? data.text : "";
+    // Normalize whitespace
+    return text.replace(/\u0000/g, " ").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  } catch (err) {
+    console.error("[pdf-parse] failed:", err && err.message);
+    return "";
+  }
+}
+
+function isPdfBuffer(buf) {
+  return buf && buf.length > 4 && buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46; // %PDF
+}
 
 /* ---------------- Skill database per role ---------------- */
 const GENERAL_TECH_SKILLS = [
