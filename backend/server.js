@@ -575,6 +575,10 @@ app.get("/", (_req, res) => {
 app.post("/analyze", (req, res) => {
   try {
     const { resumeText, jobRole } = req.body || {};
+    console.log("[/analyze] jobRole=", jobRole, "resumeText length=", resumeText ? resumeText.length : 0);
+    if (resumeText && typeof resumeText === "string") {
+      console.log("[/analyze] resumeText preview:", resumeText.slice(0, 200).replace(/\s+/g, " "));
+    }
     if (!resumeText || typeof resumeText !== "string" || resumeText.trim().length < 20)
       return res.status(400).json({ error: "resumeText must be a string of at least 20 characters." });
     if (!jobRole || typeof jobRole !== "string")
@@ -584,6 +588,7 @@ app.post("/analyze", (req, res) => {
     const found = extractSkills(resumeText);
     const matched = found.filter((s) => required.includes(s));
     const missing = required.filter((s) => !found.includes(s));
+    console.log("[/analyze] role=", roleKey, "extracted=", found.length, "matched=", matched.length, "/", required.length);
 
     // Score is STRICTLY derived from matched vs required role skills.
     // Invariants:
