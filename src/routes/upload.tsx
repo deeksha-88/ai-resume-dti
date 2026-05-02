@@ -72,7 +72,7 @@ function UploadPage() {
     } catch (err) {
       setError(
         err instanceof Error
-          ? `${err.message}. Make sure the backend is running on http://localhost:5000.`
+          ? `${err.message}. Make sure the backend is running on https://ai-resume-dti-1.onrender.com/.`
           : "Failed to analyze",
       );
     } finally {

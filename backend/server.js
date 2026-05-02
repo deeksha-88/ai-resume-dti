@@ -728,4 +728,4 @@ app.post("/interview/next", (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Resume Analyzer API on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`✅ Resume Analyzer API on port ${PORT}`));

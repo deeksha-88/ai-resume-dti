@@ -10,7 +10,7 @@ npm install
 npm start
 ```
 
-The server listens on **http://localhost:5000**.
+The server listens on **https://ai-resume-dti-1.onrender.com/**.
 
 ## Endpoints
 

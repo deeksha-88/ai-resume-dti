@@ -1,4 +1,4 @@
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:5000";
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || "https://ai-resume-dti-1.onrender.com/";
 
 export type AnalysisResult = {
   jobRole: string;
